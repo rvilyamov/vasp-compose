@@ -1,0 +1,42 @@
+services:
+  vaccine-frontend:
+    container_name: vaccine-frontend
+    image: damirvilyamov/vasp-frontend:latest
+    expose:
+      - "3000"
+    environment:
+      - NODE_ENV=production
+#    restart: always
+    networks:
+      - app-network
+#    healthcheck:
+#      test: ["CMD", "curl", "-f", "http://localhost:3000"]
+#      interval: 30s
+#      timeout: 10s
+#      retries: 3
+#      start_period: 60s
+
+  nginx-prod:
+    image: damirvilyamov/vasp-nginx:latest
+    ports:
+      - "80:80"
+      - "443:443"
+    environment:
+      - NODE_ENV=production
+      - PROD_DOMAIN=${PROD_DOMAIN:-localhost}
+      - APP_PORT=3000
+      - APP_ROOT=/app
+      - PROD_SSL_CERT=/etc/nginx/certs/nginx-selfsigned.crt
+      - PROD_SSL_KEY=/etc/nginx/certs/nginx-selfsigned.key
+    volumes:
+      - /Users/rvilyamov/Documents/side/nginx/certs:/etc/nginx/certs:ro
+      - /Users/rvilyamov/Documents/side/nginx/logs:/var/log/nginx
+    depends_on:
+      - vaccine-frontend
+#    restart: always
+    networks:
+      - app-network
+
+networks:
+  app-network:
+    driver: bridge
